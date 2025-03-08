@@ -1,26 +1,39 @@
-import { useEffect, useState } from 'react';
-import { getGifs } from '../helpers/getGifs';
+import { getGifs } from '../helpers/getGifs'; // Importa el helper
+import { useState, useEffect, useCallback } from "react";
 
-export const useFetchGifs = ( category ) => {
- 
-    const [images, setImages] = useState([]);
-    const [isLoading, setIsLoading] = useState( true );
+export const useFetchGifs = (category) => {
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-    const getImages = async() => {
-        const newImages = await getGifs( category );
-        setImages(newImages);
-        setIsLoading(false);
-    }
+  const getImages = useCallback(async () => {
+    try {
+      setIsLoading(true);
+
+  
+      const newImages = await getGifs(category);
+
     
-    useEffect( () => {
-        getImages();
-    }, []);
-
-
-
-    return {
-        images,
-        isLoading
+      setImages(newImages);
+    } catch (error) {
+      console.error("Error fetching GIFs:", error);
+      setImages([]);
+    } finally {
+      setIsLoading(false);
     }
+  }, [category]);
 
-}
+  const refresh = useCallback(() => {
+    getImages();
+  }, [getImages]);
+
+  useEffect(() => {
+    getImages();
+  }, [category, getImages]);
+
+  return {
+    images,
+    isLoading,
+    refresh,
+  };
+};
+

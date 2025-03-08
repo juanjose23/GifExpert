@@ -1,69 +1,121 @@
-export const GifPagination = ({ totalPages, currentPage, setCurrentPage }) => {
+
+import React from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+
+export const GifPagination = ({ totalPages, currentPage, setCurrentPage, darkMode }) => {
+  if (totalPages <= 1) return null
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages = []
+    const maxPagesToShow = 5
+
+    if (totalPages <= maxPagesToShow) {
+      // Show all pages if there are few
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      // Always show first page
+      pages.push(1)
+
+      // Calculate start and end of page range
+      let start = Math.max(2, currentPage - 1)
+      let end = Math.min(totalPages - 1, currentPage + 1)
+
+      // Adjust if at the beginning
+      if (currentPage <= 2) {
+        end = 4
+      }
+
+      // Adjust if at the end
+      if (currentPage >= totalPages - 1) {
+        start = totalPages - 3
+      }
+
+      // Add ellipsis if needed
+      if (start > 2) {
+        pages.push("...")
+      }
+
+      // Add middle pages
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+
+      // Add ellipsis if needed
+      if (end < totalPages - 1) {
+        pages.push("...")
+      }
+
+      // Always show last page
+      pages.push(totalPages)
+    }
+
+    return pages
+  }
+
   return (
-    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-      {/* Botones para pantallas pequeñas */}
-      <div className="flex flex-1 justify-between sm:hidden">
+    <div className="flex justify-center py-8">
+      <div className="flex items-center space-x-1">
         <button
-          onClick={() => setCurrentPage(currentPage - 1)}
+          onClick={goToPrevPage}
           disabled={currentPage === 1}
-          className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className={`p-2 rounded-md ${
+            currentPage === 1
+              ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+              : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          } transition-colors duration-200`}
+          aria-label="Previous page"
         >
-          Previous
+          <ChevronLeft size={20} />
         </button>
+
+        {getPageNumbers().map((page, index) => (
+          <React.Fragment key={index}>
+            {page === "..." ? (
+              <span className="px-2 py-1 text-gray-500 dark:text-gray-400">...</span>
+            ) : (
+              <button
+                onClick={() => setCurrentPage(page)}
+                className={`min-w-[36px] h-9 px-3 rounded-md ${
+                  currentPage === page
+                    ? "bg-indigo-500 dark:bg-indigo-600 text-white font-medium"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                } transition-colors duration-200`}
+              >
+                {page}
+              </button>
+            )}
+          </React.Fragment>
+        ))}
+
         <button
-          onClick={() => setCurrentPage(currentPage + 1)}
+          onClick={goToNextPage}
           disabled={currentPage === totalPages}
-          className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className={`p-2 rounded-md ${
+            currentPage === totalPages
+              ? "text-gray-300 dark:text-gray-600 cursor-not-allowed"
+              : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          } transition-colors duration-200`}
+          aria-label="Next page"
         >
-          Next
+          <ChevronRight size={20} />
         </button>
-      </div>
-
-      {/* Paginación para pantallas grandes */}
-      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        
-        <div>
-          <nav className="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
-            {/* Botón "Previous" */}
-            <button
-              onClick={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-            >
-              <span className="sr-only">Previous</span>
-              <svg className="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path
-                  fillRule="evenodd"
-                  d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-
-            {/* Número de página actual */}
-            <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-gray-300 ring-inset">
-              Página {currentPage} de {totalPages}
-            </span>
-
-            {/* Botón "Next" */}
-            <button
-              onClick={() => setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-            >
-              <span className="sr-only">Next</span>
-              <svg className="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path
-                  fillRule="evenodd"
-                  d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </nav>
-        </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
